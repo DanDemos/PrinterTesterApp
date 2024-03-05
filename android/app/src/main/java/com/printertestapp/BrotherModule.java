@@ -84,7 +84,7 @@ public class BrotherModule extends ReactContextBaseJavaModule {
                 return;
             }
             File dir = context.getExternalFilesDir(null);
-            File file = new File(dir, "YourImageFilename");
+            File file = new File(dir, "testJPG.jpg");
             PrinterDriver printerDriver = result.getDriver();
             QLPrintSettings printSettings = new QLPrintSettings(PrinterModel.QL_820NWB);
             printSettings.setLabelSize(QLPrintSettings.LabelSize.DieCutW62H100);
@@ -92,9 +92,9 @@ public class BrotherModule extends ReactContextBaseJavaModule {
             printSettings.setWorkPath(dir.toString());
             PrintError printError = printerDriver.printImage(file.toString(), printSettings);
             if (printError.getCode() != PrintError.ErrorCode.NoError) {
-                Log.d("", "Error - Print Image: " + printError.getErrorDescription());
+                Log.d("", "Error - Print Image: " + file.toString() + printError.getErrorDescription());
                 printerDriver.closeChannel();
-                promise.resolve("Error - Print Image: " + printError.getErrorDescription());
+                promise.resolve("Error - Print Image: " + file.toString() + printError.getErrorDescription());
             }
             else {
                 Log.d("", "Success - Print Image");
@@ -151,7 +151,7 @@ public class BrotherModule extends ReactContextBaseJavaModule {
                     return;
                 }
                 File dir = context.getExternalFilesDir(null);
-                File file = new File(dir, "YourImageFilename");
+                File file = new File(dir, "testJPG.jpg");
                 PrinterDriver printerDriver = result.getDriver();
                 QLPrintSettings printSettings = new QLPrintSettings(PrinterModel.QL_820NWB);
                 printSettings.setLabelSize(QLPrintSettings.LabelSize.DieCutW62H100);
@@ -159,9 +159,9 @@ public class BrotherModule extends ReactContextBaseJavaModule {
                 printSettings.setWorkPath(dir.toString());
                 PrintError printError = printerDriver.printImage(file.toString(), printSettings);
                 if (printError.getCode() != PrintError.ErrorCode.NoError) {
-                    Log.d("", "Error - Print Image: " + printError.getErrorDescription());
+                    Log.d("", "Error - Print Image: "  + file.toString() + printError.getErrorDescription());
                     printerDriver.closeChannel();
-                    promise.resolve("Error - Print Image: " + printError.getErrorDescription());
+                    promise.resolve("Error - Print Image: " + file.toString() + printError.getErrorDescription());
                 } else {
                     Log.d("", "Success - Print Image");
                     printerDriver.closeChannel();
