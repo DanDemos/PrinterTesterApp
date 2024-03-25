@@ -6,10 +6,7 @@ import { createMaterialTopTabNavigator } from "@react-navigation/material-top-ta
 import { NavigationContainer } from "@react-navigation/native";
 import CustomDrawer from "../components/customDrawer/customDrawer";
 import { SafeAreaView, SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
-import TreverPage from "screens/trever/TreverPage";
-import ContactPage from "screens/contact/ContactPage";
 import LoginPage from "screens/auth/LoginPage";
-import { SimplePrint } from "screens/trever/SimplePrint";
 import AllInOneYTPage from "screens/AllInOneYT/AllInOneYTPage"
 import BrotherSDKPage from "screens/brothersdk/BrotherSDKPage";
 import XprinterPage from "screens/xprinter/XprinterPage";
@@ -73,10 +70,6 @@ const AppStack = () => {
     <Stack.Navigator
       screenOptions={{ animation: 'none', headerShown: false }}>
       {/* screenOptions={{ animation: 'fade_from_bottom', headerShown: false }}> */}
-      <Stack.Screen name="TreverPage" component={TreverPage} />
-      <Stack.Screen name="LoginPage" component={LoginPage} />
-      <Stack.Screen name="ContactPage" component={ContactPage} />
-      <Stack.Screen name="SimplePrint" component={SimplePrint} />
       <Stack.Screen name="AllInOneYTPage" component={AllInOneYTPage} />
       <Stack.Screen name="BrotherSDKPage" component={BrotherSDKPage} />
       <Stack.Screen name="XprinterPage" component={XprinterPage} />

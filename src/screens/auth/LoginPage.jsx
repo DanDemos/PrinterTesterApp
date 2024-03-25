@@ -41,9 +41,9 @@ const LoginPage = props => {
         <LoadingComponent loadingGroup={"g"} loadingDesign={<Text>ooooooooooo</Text>}></LoadingComponent>
         <Text style={styles.title}>{loadingID_arr.user_id}</Text>
       </View>
-      <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('TreverPage')}>
+      {/* <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('TreverPage')}>
         <Text style={styles.buttonText} >Go to home page</Text>
-      </TouchableOpacity>
+      </TouchableOpacity> */}
 
       <TouchableOpacity style={styles.button} onPress={login}>
         <Text>call api</Text>

@@ -11,7 +11,6 @@ import ThermalPrinterModule from 'react-native-thermal-printer';
 import {NativeModules} from 'react-native';
 
 const AllInOneYTPage = props => {
-  console.log(NativeModules.MyBrotherModule.printImage, "MyBrotherModule")
   return (
     <CustomContainer children={ChildComponent()}
       scrollview={false}
@@ -37,7 +36,6 @@ const AllInOneYTPage = props => {
 
 const ChildComponent = (props) => {
   const isFocused = useIsFocused();
-
   const [ip, setip] = useState("192.168.110.113:8081");
   const [error, setError] = useState(null);
   const [state, setState] = useState(null);

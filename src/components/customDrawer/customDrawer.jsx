@@ -12,11 +12,11 @@ export const CustomDrawer = props => {
       <DrawerContentScrollView style={{ backgroundColor: "lightgreen" }} {...props}>
         <Text style={{ textAlign: "center", backgroundColor: "#ccc" }}>Welcome Dan</Text>
         <ScrollView style={{ flexGrow: 1, backgroundColor: "pink", paddingTop: 10 }}>
-          <DrawerItem
+          {/* <DrawerItem
             label="tr3v3r"
             icon={({ focused, color, size }) => <IconComp name={focused ? 'home' : 'home'} type="awesome" size={size} color={color} />}
             onPress={() => navigation.navigate('TreverPage')}
-          />
+          /> */}
           <DrawerItem
             label="Login"
             icon={({ focused, color, size }) => <IconComp name={focused ? 'login-variant' : 'login-variant'} type="mcommunity" size={size} color={color} />}

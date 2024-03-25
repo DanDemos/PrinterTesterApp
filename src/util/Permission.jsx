@@ -29,13 +29,13 @@ export const requestLocationPermission = async () => {
           console.log('ACCESS_FINE_LOCATION permission denied');
           return false;
         }
-        
+
       case "ios":
         return Geolocation.requestAuthorization("whenInUse")
       default:
         break;
     }
-    
+
   } catch (err) {
     console.warn(err);
   }
@@ -43,20 +43,58 @@ export const requestLocationPermission = async () => {
 
 export const requestBluetoothPermission = async () => {
   try {
-    const granted = await PermissionsAndroid.request(
-      PermissionsAndroid.PERMISSIONS.BLUETOOTH_SCAN,
-      PermissionsAndroid.PERMISSIONS.BLUETOOTH_CONNECT,
-    );
-
-    if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-      console.log(PermissionsAndroid.RESULTS.GRANTED);
-      console.log('You can use');
-      return true
+    if (Platform.OS === 'android') {
+      const res = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION
+      );
+      await PermissionsAndroid.requestMultiple([
+        PermissionsAndroid.PERMISSIONS.BLUETOOTH_SCAN,
+        PermissionsAndroid.PERMISSIONS.BLUETOOTH_CONNECT,
+      ]);
+      if (res === PermissionsAndroid.RESULTS.GRANTED) {
+        return true
+      }
+      else {
+        return false
+      }
     } else {
-      console.log('permission denied');
-      return false
+      return true
     }
   } catch (err) {
     console.warn(err);
   }
+};
+
+export const requestWriteExternalStoragePermission = async () => {
+  try {
+    switch (OS) {
+      case "android":
+        const granted = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+          {
+            title: 'Storage Permission',
+            message: 'App needs access to your storage to save images.',
+            buttonNeutral: 'Ask Me Later',
+            buttonNegative: 'Cancel',
+            buttonPositive: 'OK',
+          },
+        );
+        if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+          console.log('Write External Storage permission granted');
+          return true
+        } else {
+          console.log('Write External Storage permission denied');
+          return false
+        }
+
+      case "ios":
+        return true
+      default:
+        break;
+    }
+
+  } catch (err) {
+    console.warn(err);
+  }
+
 };

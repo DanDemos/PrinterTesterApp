@@ -16,12 +16,12 @@ const BottomTab = props => {
     <View style={{ backgroundColor: THEME_COLOR.primary, width: "100%", height: 80, paddingLeft: 10, paddingRight: 10 }}>
       <View style={{ flex: 1, flexDirection: "row", justifyContent: "space-evenly", alignItems: "center" }}>
 
-        <BottomTabBtn onPress={(_ => navigation?.navigate("TreverPage"))}>
+        {/* <BottomTabBtn onPress={(_ => navigation?.navigate("TreverPage"))}>
           <IconComp icon name="triangle" type="ionic" size={30} color={route.name == "TreverPage" ? THEME_COLOR.whitish : THEME_COLOR.dark_brown} />
           <Text style={{ fontSize: 12, color: route.name == "TreverPage" ? THEME_COLOR.whitish : THEME_COLOR.dark_brown }}>
             tr3v3r
           </Text>
-        </BottomTabBtn>
+        </BottomTabBtn> */}
         <BottomTabBtn onPress={(_ => navigation?.navigate("AllInOneYTPage"))}>
           <IconComp icon name="square-sharp" type="ionic" size={30} color={route.name == "AllInOneYTPage" ? THEME_COLOR.whitish : THEME_COLOR.dark_brown} />
           <Text style={{ fontSize: 12, color: THEME_COLOR.dark_brown }}>

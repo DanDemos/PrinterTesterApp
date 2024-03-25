@@ -53,11 +53,11 @@ const ChildComponent = (props) => {
     setError(a)
   }
 
-  async function printImageBluetooth() {
+  async function printAutoImageBluetooth() {
     let bluetoothPermission = requestBluetoothPermission();
     console.log(bluetoothPermission, "bluetooth")
     if (bluetoothPermission) {
-      let b = await NativeModules.MyBrotherModule.printImageBluetooth()
+      let b = await NativeModules.MyBrotherModule.printAutoImageBluetooth()
       setError(b)
     }
   }
@@ -85,7 +85,7 @@ const ChildComponent = (props) => {
           style={{ marginBottom: 10 }}
           disable={ip ? false : true}
           title="Print with Bluetooth"
-          onPress={() => printImageBluetooth()}
+          onPress={() => printAutoImageBluetooth()}
         />
 
         {state ? (

@@ -1,12 +1,22 @@
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { View, Text, StyleSheet, TouchableOpacity, Alert, Dimensions, StatusBar, TextInput } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, Alert, Dimensions, StatusBar, TextInput, ImageBackground } from 'react-native';
 import { useNavigation, useIsFocused } from '@react-navigation/native';
 import { FrameText } from '../../customizedNative/FrameText';
 import CustomContainer from 'screens/layout/CustomContainer';
 import { THEME_COLOR } from 'util/color';
 
-import React, { memo, useEffect, useState } from 'react';
+import React, { useMemo, memo, useEffect, useState, useRef } from 'react';
 import { PrintersList, Button, ScreenTitle } from '../../components';
+
+import QRCode from 'react-native-qrcode-svg';
+import SvgUri from 'react-native-svg-uri';
+import RNFS from 'react-native-fs';
+import { requestLocationPermission, requestWriteExternalStoragePermission } from 'util/Permission';
+import ViewShot from 'react-native-view-shot';
+import { requestBluetoothPermission } from 'util/Permission';
+import { NativeModules } from 'react-native';
+
+const screenWidth = Dimensions.get('window').width;
 
 const XprinterPage = props => {
   return (
@@ -37,9 +47,13 @@ const ChildComponent = (props) => {
 
   const [error, setError] = useState(null);
   const [state, setState] = useState(null);
+  const [imageURI, setImageURI] = useState(null);
+  const [latestFilename, setLatestFilename] = useState(null);
+  const viewShotRef = useRef(null);
 
   useEffect(() => {
     if (isFocused) {
+      deleteImageIfExists();
       setError(null)
     }
   }, [isFocused]);
@@ -50,9 +64,49 @@ const ChildComponent = (props) => {
     }, 4000);
   }, [error]);
 
-  function printImage() {
+  useEffect(() => {
+    console.log(imageURI, "imageURI")
+  }, [imageURI]);
 
-    console.log("NativeModules printImage")
+  const deleteImageIfExists = async () => {
+    try {
+      const path = RNFS.DocumentDirectoryPath + '/helloworld.png';
+      const fileExists = await RNFS.exists(path);
+      if (fileExists) {
+        await RNFS.unlink(path);
+        console.log('Existing image deleted successfully.');
+      }
+    } catch (error) {
+      console.error('Error deleting existing image: ', error);
+    }
+  };
+
+  const handleSaveImage = async () => {
+    try {
+      // Generate a unique filename (e.g., using timestamp)
+      const timestamp = Date.now();
+      const path = RNFS.DocumentDirectoryPath + `/${timestamp}.png`;
+
+      // Save the captured image to the new filename
+      const uri = await viewShotRef.current.capture();
+      await RNFS.copyFile(uri, path);
+
+      // Set the latest filename and image URI
+      setLatestFilename(path);
+      setImageURI('file://' + path);
+    } catch (error) {
+      console.error('Error saving image: ', error);
+    }
+  };
+
+  async function printImageBluetooth(imageURI) {
+    let locationPermission = await requestLocationPermission()
+    let bluetoothPermission = await requestBluetoothPermission();
+    console.log(bluetoothPermission, "bluetooth")
+    if (bluetoothPermission) {
+      let b = await NativeModules.MyBrotherModule.printImageBluetooth(imageURI)
+      setError(b)
+    }
   }
 
   return (
@@ -61,11 +115,39 @@ const ChildComponent = (props) => {
       <View style={styles.contentCotainer}>
         <ScreenTitle title="XprinterPage" />
         <Button
-          disable
           style={{ marginBottom: 10 }}
-          title="Xprinter Print"
-          onPress={() => printImage()}
+          title="Save Image"
+          onPress={() => handleSaveImage()}
         />
+
+        <Button
+          style={{ marginBottom: 10 }}
+          title="Print with Bluetooth"
+          onPress={() => printImageBluetooth(imageURI)}
+        />
+
+        <ViewShot ref={viewShotRef} options={{ format: 'png', quality: 1 }}>
+          <View style={{ width: 200, height: 100 }}>
+            <View style={{ flex: 1, flexDirection: "row", backgroundColor: "white", justifyContent: "space-evenly", alignItems: 'center' }}>
+              <QRCode value="Your QR code data here" size={60} />
+              <View>
+                <Text>CGS-Steel</Text>
+                <Text>0000000884471</Text>
+                <Text>No of items : 2</Text>
+                <Text>3D2F</Text>
+              </View>
+            </View>
+          </View>
+        </ViewShot>
+
+        <View style={{ flex: 1 }}>
+          <Image
+            source={imageURI ? { uri: imageURI } : require('./../../../files/testPNG.png')}
+            style={{ width: screenWidth, aspectRatio: 1, resizeMode: 'contain' }} />
+          {/* <Image
+            source={require('./../../../files/testPNG.png')}
+            style={{ width: screenWidth, aspectRatio: 1, resizeMode: 'contain' }} /> */}
+        </View>
 
         {state ? (
           <Text style={styles.stateText}>{state}</Text>
@@ -74,11 +156,21 @@ const ChildComponent = (props) => {
           <Text style={styles.errorText}>{error}</Text>
         ) : null}
       </View>
-    </View>
+    </View >
   )
 }
 
 const styles = StyleSheet.create({
+  imgcontainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+  },
+  imgcolumn: {
+    flex: 1,
+    alignItems: 'center',
+  },
   container: {
     flex: 1,
     margin: 0,

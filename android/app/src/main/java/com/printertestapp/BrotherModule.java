@@ -5,6 +5,10 @@ import android.content.pm.PackageManager;
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.BitmapDrawable;
 import android.provider.Settings;
 import android.util.Log;
 import android.widget.Toast;
@@ -12,6 +16,7 @@ import android.bluetooth.BluetoothAdapter;
 import androidx.annotation.NonNull;
 import android.os.Build;
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 import com.brother.sdk.lmprinter.Channel;
 import com.brother.sdk.lmprinter.OpenChannelError;
@@ -83,18 +88,21 @@ public class BrotherModule extends ReactContextBaseJavaModule {
                 promise.resolve("Error - Open Channel: " + result.getError().getCode());
                 return;
             }
+            Drawable drawable = ContextCompat.getDrawable(context, R.drawable.testjpg); // Get the drawable
+            Bitmap bitmapA = ((BitmapDrawable) drawable).getBitmap(); // Convert the drawable to a Bitmap
+
             File dir = context.getExternalFilesDir(null);
-            File file = new File(dir, "testJPG.jpg");
+            File file = new File(dir, "testjpg.jpg");
             PrinterDriver printerDriver = result.getDriver();
             QLPrintSettings printSettings = new QLPrintSettings(PrinterModel.QL_820NWB);
             printSettings.setLabelSize(QLPrintSettings.LabelSize.DieCutW62H100);
             printSettings.setAutoCut(true);
             printSettings.setWorkPath(dir.toString());
-            PrintError printError = printerDriver.printImage(file.toString(), printSettings);
+            PrintError printError = printerDriver.printImage(bitmapA, printSettings);
             if (printError.getCode() != PrintError.ErrorCode.NoError) {
-                Log.d("", "Error - Print Image: " + file.toString() + printError.getErrorDescription());
+                Log.d("", "Error - Print Image: " + bitmapA + printError.getErrorDescription());
                 printerDriver.closeChannel();
-                promise.resolve("Error - Print Image: " + file.toString() + printError.getErrorDescription());
+                promise.resolve("Error - Print Image: " + bitmapA + printError.getErrorDescription());
             }
             else {
                 Log.d("", "Success - Print Image");
@@ -105,7 +113,7 @@ public class BrotherModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void printImageBluetooth(final Promise promise){
+    public void printAutoImageBluetooth(final Promise promise){
         // Simulate asynchronous operation
         new Thread(() -> {
             BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
@@ -151,17 +159,21 @@ public class BrotherModule extends ReactContextBaseJavaModule {
                     return;
                 }
                 File dir = context.getExternalFilesDir(null);
-                File file = new File(dir, "testJPG.jpg");
+                File file = new File(dir, "testjpg.jpg");
+
+                Drawable drawable = ContextCompat.getDrawable(context, R.drawable.testjpg); // Get the drawable
+                Bitmap bitmapA = ((BitmapDrawable) drawable).getBitmap(); // Convert the drawable to a Bitmap
+
                 PrinterDriver printerDriver = result.getDriver();
                 QLPrintSettings printSettings = new QLPrintSettings(PrinterModel.QL_820NWB);
-                printSettings.setLabelSize(QLPrintSettings.LabelSize.DieCutW62H100);
+                printSettings.setLabelSize(QLPrintSettings.LabelSize.RollW62RB);
                 printSettings.setAutoCut(true);
                 printSettings.setWorkPath(dir.toString());
-                PrintError printError = printerDriver.printImage(file.toString(), printSettings);
+                PrintError printError = printerDriver.printImage(bitmapA, printSettings);
                 if (printError.getCode() != PrintError.ErrorCode.NoError) {
-                    Log.d("", "Error - Print Image: "  + file.toString() + printError.getErrorDescription());
+                    Log.d("", "Error - Print Image: "  + bitmapA + printError.getErrorDescription());
                     printerDriver.closeChannel();
-                    promise.resolve("Error - Print Image: " + file.toString() + printError.getErrorDescription());
+                    promise.resolve("Error - Print Image: " + bitmapA + printError.getErrorDescription());
                 } else {
                     Log.d("", "Success - Print Image");
                     printerDriver.closeChannel();
@@ -171,6 +183,86 @@ public class BrotherModule extends ReactContextBaseJavaModule {
         }).start();
     }
 
+    @ReactMethod
+    public void printImageBluetooth(String imageURI, final Promise promise){
+        Log.e("imageURI", imageURI+" this is imageURI");
+        // Simulate asynchronous operation
+        new Thread(() -> {
+            BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+
+            // Check if Bluetooth is supported on the device
+            if (bluetoothAdapter == null) {
+                Log.e("Error", "Bluetooth is not supported on this device");
+                promise.reject("Error", "Bluetooth is not supported on this device");
+                return;
+            }
+
+            // Check if Bluetooth is enabled
+            if (!bluetoothAdapter.isEnabled()) {
+                Log.e("Error", "Bluetooth is not enabled");
+                promise.reject("Error", "Bluetooth is not enabled");
+                return;
+            }
+
+            // Get the list of bonded (paired) devices
+            // Check if permission is granted
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && ActivityCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH) != PackageManager.PERMISSION_GRANTED) {
+                // Permission not granted, request it from the user
+                ActivityCompat.requestPermissions(getCurrentActivity(), new String[]{Manifest.permission.BLUETOOTH}, REQUEST_BLUETOOTH_PERMISSION);
+                // You may also request other Bluetooth-related permissions here if needed
+            }
+            else{
+                Set<BluetoothDevice> pairedDevices = bluetoothAdapter.getBondedDevices();
+                // Check if there are paired devices
+                if (pairedDevices.isEmpty()) {
+                    promise.reject("Error", "No paired Bluetooth devices found");
+                    return;
+                }
+
+                // Get the MAC address of the first paired device
+                BluetoothDevice firstDevice = pairedDevices.iterator().next();
+                String macAddress = firstDevice.getAddress();
+
+                Channel channel = Channel.newBluetoothChannel(macAddress, bluetoothAdapter);
+                PrinterDriverGenerateResult result = PrinterDriverGenerator.openChannel(channel);
+                if (result.getError().getCode() != OpenChannelError.ErrorCode.NoError) {
+                    Log.e("", "Error - Open Channel: " + result.getError().getCode());
+                    promise.resolve("Error - Open Channel: " + result.getError().getCode());
+                    return;
+                }
+                File dir = context.getExternalFilesDir(null);
+//                File file = new File(dir, "testjpg.jpg");
+
+//                Drawable drawable = ContextCompat.getDrawable(context, R.drawable.testjpg); // Get the drawable
+//                Bitmap bitmapA = ((BitmapDrawable) drawable).getBitmap(); // Convert the drawable to a Bitmap
+
+                PrinterDriver printerDriver = result.getDriver();
+                QLPrintSettings printSettings = new QLPrintSettings(PrinterModel.QL_820NWB);
+                printSettings.setLabelSize(QLPrintSettings.LabelSize.RollW62RB);
+                printSettings.setAutoCut(true);
+                printSettings.setWorkPath(dir.toString());
+
+                Bitmap bitmap = null;
+                String processedimageURI = imageURI.replaceFirst("^file://", "");
+                File file = new File(processedimageURI);
+                bitmap = BitmapFactory.decodeFile(file.getAbsolutePath());
+
+                Log.d("", "Error - Print Image file url: "  + file);
+                Log.d("", "Error - Print Image bitmap: "  + bitmap);
+
+                PrintError printError = printerDriver.printImage(bitmap, printSettings);
+                if (printError.getCode() != PrintError.ErrorCode.NoError) {
+                    Log.d("", "Error - Print Image: "  + bitmap + printError.getErrorDescription());
+                    printerDriver.closeChannel();
+                    promise.resolve("Error - Print Image: " + bitmap + printError.getErrorDescription());
+                } else {
+                    Log.d("", "Success - Print Image");
+                    printerDriver.closeChannel();
+                    promise.resolve("Success - Print Image");
+                }
+            }
+        }).start();
+    }
     private PrinterSearchResult startBluetoothSearch(Context context) {
         return PrinterSearcher.startBluetoothSearch(context);
     }
