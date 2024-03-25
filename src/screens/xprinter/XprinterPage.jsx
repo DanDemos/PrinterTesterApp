@@ -100,7 +100,6 @@ const ChildComponent = (props) => {
   };
 
   async function printImageBluetooth(imageURI) {
-    let locationPermission = await requestLocationPermission()
     let bluetoothPermission = await requestBluetoothPermission();
     console.log(bluetoothPermission, "bluetooth")
     if (bluetoothPermission) {
